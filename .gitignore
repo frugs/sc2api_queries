@@ -2,3 +2,5 @@ ladder_data.cache
 .idea/
 **/__pychache/
 **/*.pyc
+MANIFEST
+dist/

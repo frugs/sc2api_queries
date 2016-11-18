@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'sc2api_queries',
-  packages = ['sc2api_queries'], # this must be the same as the name above
+  name = 'sc2gamedata',
+  packages = ['sc2gamedata'],
   version = '0.0.1',
   description = 'Utility for making queries on the SC2 Game Data API',
   author = 'Hugo Wainwright',
