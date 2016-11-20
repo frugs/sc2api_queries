@@ -15,8 +15,8 @@ _league_ids = range(6)
 
 
 def _get_game_data(access_token: str, path: str) -> dict:
-    response = urllib.request.urlopen(_game_data_resource + path + "?access_token=" + access_token)
-    response_str = response.read().decode('utf8')
+    with urllib.request.urlopen(_game_data_resource + path + "?access_token=" + access_token) as response:
+        response_str = response.read().decode('utf8')
     return json.loads(response_str)
 
 
