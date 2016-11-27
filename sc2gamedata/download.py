@@ -1,9 +1,11 @@
 import json
 import typing
 import urllib.request
+import urllib.error
 import multiprocessing
 import functools
 import itertools
+import time
 
 from . import GameData
 
@@ -20,11 +22,22 @@ def regions():
     return REGIONS
 
 
+def _get_game_data_inner(access_token: str, region: str, path: str, retry_count: int):
+    try:
+        game_data_resource = _game_data_resource_template.format(region.lower())
+        with urllib.request.urlopen(game_data_resource + path + "?access_token=" + access_token) as response:
+            response_str = response.read().decode('utf8')
+        return json.loads(response_str)
+    except urllib.error.HTTPError as e:
+        time.sleep(2)
+        if retry_count < 10:
+            return _get_game_data_inner(access_token, region, path, retry_count + 1)
+        else:
+            raise e
+
+    
 def _get_game_data(access_token: str, region: str, path: str) -> dict:
-    game_data_resource = _game_data_resource_template.format(region.lower())
-    with urllib.request.urlopen(game_data_resource + path + "?access_token=" + access_token) as response:
-        response_str = response.read().decode('utf8')
-    return json.loads(response_str)
+    return _get_game_data_inner(access_token, region, path, 0)
 
 
 def get_current_season_data(access_token: str, region: str="us") -> dict:
