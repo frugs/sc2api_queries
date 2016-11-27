@@ -13,7 +13,11 @@ _team_type_arranged = "0"
 
 _league_ids = range(6)
 
-REGIONS = ["eu", "kr", "sea", "tw", "us"]
+REGIONS = ["eu", "kr", "tw", "us"]
+
+
+def regions():
+    return REGIONS
 
 
 def _get_game_data(access_token: str, region: str, path: str) -> dict:
