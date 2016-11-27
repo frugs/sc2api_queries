@@ -7,31 +7,34 @@ import itertools
 
 from . import GameData
 
-_game_data_resource = "https://us.api.battle.net/data/sc2"
+_game_data_resource_template = "https://{}.api.battle.net/data/sc2"
 _queue_id_1v1 = "201"
 _team_type_arranged = "0"
 
 _league_ids = range(6)
 
+REGIONS = ["eu", "kr", "sea", "tw", "us"]
 
-def _get_game_data(access_token: str, path: str) -> dict:
-    with urllib.request.urlopen(_game_data_resource + path + "?access_token=" + access_token) as response:
+
+def _get_game_data(access_token: str, region: str, path: str) -> dict:
+    game_data_resource = _game_data_resource_template.format(region.lower())
+    with urllib.request.urlopen(game_data_resource + path + "?access_token=" + access_token) as response:
         response_str = response.read().decode('utf8')
     return json.loads(response_str)
 
 
-def get_current_season_data(access_token: str) -> dict:
-    return _get_game_data(access_token, "/season/current")
+def get_current_season_data(access_token: str, region: str="us") -> dict:
+    return _get_game_data(access_token, region, "/season/current")
 
 
-def get_league_data(access_token: str, season: int, league_id: int) -> dict:
+def get_league_data(access_token: str, season: int, league_id: int, region: str="us") -> dict:
     path = "/league/{}/{}/{}/{}".format(season, _queue_id_1v1, _team_type_arranged, league_id)
-    return _get_game_data(access_token, path)
+    return _get_game_data(access_token, region, path)
 
 
-def get_ladder_data(access_token: str, ladder_id: int) -> dict:
+def get_ladder_data(access_token: str, ladder_id: int, region: str="us") -> dict:
     path = "/ladder/{}".format(ladder_id)
-    return _get_game_data(access_token, path)
+    return _get_game_data(access_token, region, path)
 
 
 def _extract_tiers(league_data) -> list:
