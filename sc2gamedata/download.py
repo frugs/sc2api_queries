@@ -65,8 +65,8 @@ def _extract_divisions(tier_id, tier_data) -> list:
     return result
 
 
-def _extract_ladders(access_token: str, division_index: int, division_data: dict) -> dict:
-    result = get_ladder_data(access_token, division_data["ladder_id"])
+def _extract_ladders(access_token: str, division_index: int, division_data: dict, region: str) -> dict:
+    result = get_ladder_data(access_token, division_data["ladder_id"], region)
     result["division_index"] = division_index
     return result
 
@@ -79,14 +79,14 @@ def _extract_teams(ladder_index, ladder_data):
     return result
 
 
-def get_game_data(access_token: str, workers: int = 10) -> GameData:
+def get_game_data(access_token: str, workers: int = 10, region: str="us") -> GameData:
     current_season_id = get_current_season_data(access_token)["id"]
 
     with multiprocessing.Pool(workers) as p:
-        leagues = p.map(functools.partial(get_league_data, access_token, current_season_id), range(len(_league_ids)))
+        leagues = p.map(functools.partial(get_league_data, access_token, current_season_id, region=region), range(len(_league_ids)))
         tiers = list(itertools.chain.from_iterable(p.map(_extract_tiers, leagues)))
         divisions = list(itertools.chain.from_iterable(p.starmap(_extract_divisions, enumerate(tiers))))
-        ladders = p.starmap(functools.partial(_extract_ladders, access_token), enumerate(divisions))
+        ladders = p.starmap(functools.partial(_extract_ladders, access_token, region=region), enumerate(divisions))
         teams = list(itertools.chain.from_iterable(p.starmap(_extract_teams, enumerate(ladders))))
 
     return GameData(leagues, tiers, divisions, ladders, teams)

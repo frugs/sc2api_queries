@@ -1,6 +1,10 @@
 import bisect
+import pickle
 import pprint
 import sc2gamedata
+import scipy.stats
+import matplotlib.pyplot
+import matplotlib.mlab
 
 _league_names = [
     "bronze",
@@ -106,12 +110,54 @@ def print_all_inspiration_mmr(game_data: sc2gamedata.GameData, clan_name: str):
     print("\n")
 
 
+def plot_per_race_mmr_histogram(game_data: sc2gamedata.GameData):
+    bins = list(range(0, 8000, 100))
+    colours = iter(['green', 'red', 'blue'])
+
+    def is_race(race: str, team: dict) -> bool:
+        member = team["member"][0]
+        return "played_race_count" in member and next(iter(member["played_race_count"][0]["race"].values())) == race
+
+    for race in ["Protoss", "Zerg", "Terran"]:
+        mmrs = [team['rating'] for team in game_data.teams() if is_race(race, team) and team['rating'] <= 8000]
+
+        mu, sigma = scipy.stats.norm.fit(mmrs)
+
+        y = matplotlib.mlab.normpdf(bins, mu, sigma)
+        matplotlib.pyplot.hist(mmrs, bins=80, range=(0, 8000), color=next(colours), histtype="stepfilled", alpha=0.3)
+        # matplotlib.pyplot.plot(bins, y, next(line_types), linewidth=2)
+
+    # matplotlib.pyplot.yticks([])
+    matplotlib.pyplot.show()
+
+
+def plot_per_region_mmr_histogram():
+    bins = list(range(0, 8000, 100))
+    line_types = iter(['b--', 'g--', 'r--'])
+
+    for region in ["us", "eu", "kr"]:
+        with open("{}.data".format(region), "rb") as file:
+            game_data = pickle.load(file)
+
+        mmrs = [team["rating"] for team in game_data.teams() if team["rating"] <= 8000]
+        mu, sigma = scipy.stats.norm.fit(mmrs)
+
+        y = matplotlib.mlab.normpdf(bins, mu, sigma)
+        # matplotlib.pyplot.hist(mmrs, bins=80, range=(0, 8000), histtype="stepfilled", alpha=0.3)
+        matplotlib.pyplot.plot(bins, y, next(line_types), linewidth=2)
+
+    matplotlib.pyplot.yticks([])
+    matplotlib.pyplot.show()
+
+
 def query_cache():
     game_data = sc2gamedata.load_cache()
 
     print_league_proportions(game_data)
     print_mmr_proportions(game_data)
     print_all_inspiration_mmr(game_data, "All Inspiration")
+    plot_per_race_mmr_histogram(game_data)
+    plot_per_region_mmr_histogram()
 
 
 if __name__ == '__main__':
