@@ -7,7 +7,7 @@ OAUTH_AUTHENTICATION_TEMPLATE = "https://{}.battle.net/oauth/token?grant_type=cl
 
 
 def get_access_token(client_id: str, client_secret: str, region: str) -> (str, int):
-    return _get_access_token_inner(0, client_id, client_secret, region)[0]
+    return _get_access_token_inner(0, client_id, client_secret, region)
 
 
 def _get_access_token_inner(retries_so_far: int, client_id: str, client_secret: str, region: str) -> (str, int):
