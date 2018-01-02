@@ -73,6 +73,25 @@ def get_profile_data(api_key: str, profile_key: str, region: str) -> dict:
     raise error
 
 
+def get_profile_ladder_data(api_key: str, profile_key: str, region: str) -> dict:
+    resource_path = "https://" + region + ".api.battle.net/sc2/profile/"
+    url_template = resource_path + "{}/ladders?apikey={}"
+    url = url_template.format(profile_key.replace("-", "/"), api_key)
+
+    retry_count = 0
+    error = None
+    while retry_count < 10:
+        try:
+            with urllib.request.urlopen(url) as response:
+                response_str = response.read().decode('utf8')
+            return json.loads(response_str)
+        except urllib.error.HTTPError as e:
+            error = e
+            retry_count += 1
+            time.sleep(2)
+    raise error
+
+
 def _extract_tiers(league_data) -> list:
     return list(reversed(league_data["tier"]))
 
