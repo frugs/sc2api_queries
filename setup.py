@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-VERSION = '0.0.14'
+VERSION = '0.0.15'
 
 setup(
   name='sc2gamedata',
