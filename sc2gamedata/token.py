@@ -3,7 +3,7 @@ import urllib.request
 import json
 import time
 
-OAUTH_AUTHENTICATION_TEMPLATE = "https://{}.battle.net/oauth/token?grant_type=client_credentials&client_id={}&client_secret={}"
+OAUTH_AUTHENTICATION_TEMPLATE = "https://{}.blizzard.com/oauth/token?grant_type=client_credentials&client_id={}&client_secret={}"
 
 
 def get_access_token(client_id: str, client_secret: str, region: str) -> (str, int):

@@ -9,7 +9,7 @@ import time
 
 from . import GameData
 
-_game_data_resource_template = "https://{}.api.battle.net/data/sc2"
+_game_data_resource_template = "https://{}.api.blizzard.com/data/sc2"
 _queue_id_1v1 = "201"
 _team_type_arranged = "0"
 
@@ -55,7 +55,7 @@ def get_ladder_data(access_token: str, ladder_id: int, region: str="us") -> dict
 
 
 def get_profile_data(api_key: str, profile_key: str, region: str) -> dict:
-    resource_path = "https://" + region + ".api.battle.net/sc2/profile/"
+    resource_path = "https://" + region + ".api.blizzard.com/sc2/profile/"
     url_template = resource_path + "{}/?apikey={}"
     url = url_template.format(profile_key.replace("-", "/"), api_key)
 
@@ -74,7 +74,7 @@ def get_profile_data(api_key: str, profile_key: str, region: str) -> dict:
 
 
 def get_profile_ladder_data(api_key: str, profile_key: str, region: str) -> dict:
-    resource_path = "https://" + region + ".api.battle.net/sc2/profile/"
+    resource_path = "https://" + region + ".api.blizzard.com/sc2/profile/"
     url_template = resource_path + "{}/ladders?apikey={}"
     url = url_template.format(profile_key.replace("-", "/"), api_key)
 
