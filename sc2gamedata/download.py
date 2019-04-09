@@ -10,6 +10,7 @@ import time
 from . import GameData
 
 _game_data_resource_template = "https://{}.api.blizzard.com/data/sc2"
+_community_resource_template = "https://{}.api.blizzard.com/sc2"
 _queue_id_1v1 = "201"
 _team_type_arranged = "0"
 
@@ -42,9 +43,26 @@ def _get_game_data_inner(access_token: str, region: str, path: str, retry_count:
         else:
             raise e
 
+def _get_community_inner(access_token: str, region: str, path: str, retry_count: int):
+    try:
+        community_resource = _community_resource_template.format(region.lower())
+        with urllib.request.urlopen(community_resource + path + "?access_token=" + access_token) as response:
+            response_str = response.read().decode('utf8')
+        return json.loads(response_str)
+    except urllib.error.HTTPError as e:
+        time.sleep(2)
+        if retry_count < 10:
+            return _get_community_inner(access_token, region, path, retry_count + 1)
+        else:
+            raise e
+
     
 def _get_game_data(access_token: str, region: str, path: str) -> dict:
     return _get_game_data_inner(access_token, region, path, 0)
+
+
+def _get_community(access_token: str, region: str, path: str) -> dict:
+    return _get_community_inner(access_token, region, path, 0)
 
 
 def get_current_season_data(access_token: str, region: str="us") -> dict:
@@ -70,23 +88,10 @@ def get_profile_ladder_summary_data(access_token: str, profile_realm: str, profi
     path = "/profile/{}/{}/{}/ladder/summary".format(REGION_IDS.get(region, 1), profile_realm, profile_id)
     return _get_game_data(access_token, region, path)
 
-def get_legacy_profile_ladder_data(api_key: str, profile_key: str, region: str) -> dict:
-    resource_path = "https://" + region + ".api.blizzard.com/sc2/legacy/profile/"
-    url_template = resource_path + "{}/ladders?apikey={}"
-    url = url_template.format(profile_key.replace("-", "/"), api_key)
 
-    retry_count = 0
-    error = None
-    while retry_count < 10:
-        try:
-            with urllib.request.urlopen(url) as response:
-                response_str = response.read().decode('utf8')
-            return json.loads(response_str)
-        except urllib.error.HTTPError as e:
-            error = e
-            retry_count += 1
-            time.sleep(2)
-    raise error
+def get_legacy_profile_ladder_data(access_token: str, profile_realm: str, profile_id: str, region: str) -> dict:
+    path = "/legacy/profile/{}/{}/{}/ladders".format(REGION_IDS.get(region, 1), profile_realm, profile_id)
+    return _get_community(access_token, region, path)
 
 
 def _extract_tiers(league_data) -> list:
