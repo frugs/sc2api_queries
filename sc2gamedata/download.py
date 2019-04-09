@@ -16,6 +16,13 @@ _team_type_arranged = "0"
 _league_ids = range(6)
 
 REGIONS = ["eu", "kr", "tw", "us"]
+REGION_IDS = {
+    "us": 1,
+    "eu": 2,
+    "kr": 3,
+    "tw": 3,
+    "cn": 4,
+}
 
 
 def regions():
@@ -54,42 +61,14 @@ def get_ladder_data(access_token: str, ladder_id: int, region: str="us") -> dict
     return _get_game_data(access_token, region, path)
 
 
-def get_profile_data(api_key: str, profile_key: str, region: str) -> dict:
-    resource_path = "https://" + region + ".api.blizzard.com/sc2/profile/"
-    url_template = resource_path + "{}/?apikey={}"
-    url = url_template.format(profile_key.replace("-", "/"), api_key)
-
-    retry_count = 0
-    error = None
-    while retry_count < 10:
-        try:
-            with urllib.request.urlopen(url) as response:
-                response_str = response.read().decode('utf8')
-            return json.loads(response_str)
-        except urllib.error.HTTPError as e:
-            error = e
-            retry_count += 1
-            time.sleep(2)
-    raise error
+def get_profile_data(access_token: str, profile_realm: str, profile_id: str, region: str) -> dict:
+    path = "/profile/{}/{}/{}".format(REGION_IDS.get(region, 1), profile_realm, profile_id)
+    return _get_game_data(access_token, region, path)
 
 
-def get_profile_ladder_data(api_key: str, profile_key: str, region: str) -> dict:
-    resource_path = "https://" + region + ".api.blizzard.com/sc2/profile/"
-    url_template = resource_path + "{}/ladders?apikey={}"
-    url = url_template.format(profile_key.replace("-", "/"), api_key)
-
-    retry_count = 0
-    error = None
-    while retry_count < 10:
-        try:
-            with urllib.request.urlopen(url) as response:
-                response_str = response.read().decode('utf8')
-            return json.loads(response_str)
-        except urllib.error.HTTPError as e:
-            error = e
-            retry_count += 1
-            time.sleep(2)
-    raise error
+def get_profile_ladder_summary_data(access_token: str, profile_realm: str, profile_id: str, region: str) -> dict:
+    path = "/profile/{}/{}/{}/ladder/summary".format(REGION_IDS.get(region, 1), profile_realm, profile_id)
+    return _get_game_data(access_token, region, path)
 
 
 def _extract_tiers(league_data) -> list:
